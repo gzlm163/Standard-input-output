@@ -32,4 +32,35 @@ public class FileSearch {
 
     return result;
   }
+  public Dictionary<string, List<string>> BuildIndex(List<TextFile> files, string[] keywords) {
+
+    Dictionary<string, List<string>> index = new Dictionary<string, List<string>>();
+
+    for (int wordIndex = 0; wordIndex < keywords.Length; wordIndex++) {
+      index[keywords[wordIndex]] = new List<string>();
+    }
+
+    for (int fileIndex = 0; fileIndex < files.Count; ++fileIndex) {
+      TextFile file = files[fileIndex];
+      file.ReadFromFile();
+
+
+      string[] pathParts = file.filePath.Split('\\');
+      string fileName = pathParts[pathParts.Length - 1];
+
+
+      for (int wordIndex = 0; wordIndex < keywords.Length; ++wordIndex) {
+        string currentWord = keywords[wordIndex];
+
+        if (file.fileContent.Contains(currentWord)) {
+
+          if (!index[currentWord].Contains(fileName)) {
+            index[currentWord].Add(fileName);
+          }
+        }
+      }
+    }
+
+    return index;
+  }
 }
