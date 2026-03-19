@@ -1,73 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 
 [Serializable]
 public class TextFile : IOriginator {
-  public string filePath;
-  public string fileContent;
+  public string FilePath;
+  public string FileContent;
   public TextFile(string path) {
-    filePath = path;
-    fileContent = "";
+    FilePath = path;
+    FileContent = "";
   }
   public void ReadFromFile() {
     try {
-      FileStream file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
+      FileStream file = new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.Read);
       StreamReader reader = new StreamReader(file);
-      fileContent = reader.ReadToEnd();
+      FileContent = reader.ReadToEnd();
       reader.Close();
     }
     catch {
       Console.WriteLine(" Error reading file. ");
-      fileContent = "";
+
+      FileContent = "";
     }
   }
 
-  public void BinarySerialize(FileStream fs) {
-    BinaryFormatter bf = new BinaryFormatter();
-    bf.Serialize(fs, this);
-    fs.Flush();
-    fs.Close();
+  public void BinarySerialize(FileStream fileStream) {
+    BinaryFormatter formatter = new BinaryFormatter();
+    formatter.Serialize(fileStream, this);
+    fileStream.Flush();
+    fileStream.Close();
   }
 
-  public void BinaryDeserialize(FileStream fs) {
-    BinaryFormatter bf = new BinaryFormatter();
-    TextFile deserialized = (TextFile)bf.Deserialize(fs);
-    filePath = deserialized.filePath;
-    fileContent = deserialized.fileContent;
-    fs.Close();
+  public void BinaryDeserialize(FileStream fileStream) {
+    BinaryFormatter formatter = new BinaryFormatter();
+    TextFile deserialized = (TextFile)formatter.Deserialize(fileStream);
+    FilePath = deserialized.FilePath;
+    FileContent = deserialized.FileContent;
+    fileStream.Close();
   }
 
-  public void XmlSerialize(FileStream fs) {
+  public void XmlSerialize(FileStream fileStream) {
     XmlSerializer xml = new XmlSerializer(this.GetType());
-    xml.Serialize(fs, this);
-    fs.Flush();
-    fs.Close();
+    xml.Serialize(fileStream, this);
+    fileStream.Flush();
+    fileStream.Close();
   }
 
-  public void XmlDeserialize(FileStream fs) {
+  public void XmlDeserialize(FileStream fileStream) {
     XmlSerializer xml = new XmlSerializer(this.GetType());
-    TextFile deserialized = (TextFile)xml.Deserialize(fs);
-    filePath = deserialized.filePath;
-    fileContent = deserialized.fileContent;
-    fs.Close();
+    TextFile deserialized = (TextFile)xml.Deserialize(fileStream);
+    FilePath = deserialized.FilePath;
+    FileContent = deserialized.FileContent;
+    fileStream.Close();
   }
 
   object IOriginator.GetMemento() {
-    return new Memento { fileContent = this.fileContent };
+    return new Memento { fileContent = this.FileContent };
   }
   void IOriginator.SetMemento(object memento) {
     if (memento is Memento) {
-      var mem = memento as Memento;
-      fileContent = mem.fileContent;
-
+      Memento mem = memento as Memento;
+      FileContent = mem.fileContent;
     }
   }
 }
