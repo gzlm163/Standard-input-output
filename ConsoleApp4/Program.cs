@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 
-
 class Program {
   static void Main(string[] args) {
     while (true) {
       Console.WriteLine("\n--- MAIN MENU ---");
       Console.WriteLine("1. Text editor");
       Console.WriteLine("2. File indexer");
-      Console.WriteLine("3. Exit");
+      Console.WriteLine("3. Search files");
+      Console.WriteLine("4. Exit");
       Console.Write("Choose action: ");
 
       switch (Console.ReadLine()) {
@@ -73,7 +73,8 @@ class Program {
               Console.WriteLine("5. Back to main menu");
               Console.Write("Choose action: ");
 
-              switch (Console.ReadLine()) {
+              string editorChoice = Console.ReadLine();
+              switch (editorChoice) {
                 case "1":
                   Console.WriteLine("\n--- File content ---");
                   Console.WriteLine(file.fileContent);
@@ -136,7 +137,9 @@ class Program {
                   break;
               }
 
-
+              if (editorChoice == "5") {
+                break;
+              }
             }
             break;
           }
@@ -152,18 +155,23 @@ class Program {
             string[] filePaths = Directory.GetFiles(folderPath, "*.txt");
 
             List<TextFile> files = new List<TextFile>();
-            foreach (string filePath in filePaths) {
-              files.Add(new TextFile(filePath));
+            for (int fileIndex = 0; fileIndex < filePaths.Length; ++fileIndex) {
+              files.Add(new TextFile(filePaths[fileIndex]));
             }
 
             FileSearch searcher = new FileSearch();
             Dictionary<string, List<string>> index = searcher.BuildIndex(files, keywords);
 
             Console.WriteLine("\n--- INDEX ---");
-            foreach (string word in keywords) {
+            for (int wordIndex = 0; wordIndex < keywords.Length; ++wordIndex) {
+              string word = keywords[wordIndex];
               Console.Write($"{word}: ");
               if (index.ContainsKey(word) && index[word].Count > 0) {
-                Console.WriteLine(string.Join(", ", index[word]));
+                for (int fileListIndex = 0; fileListIndex < index[word].Count; ++fileListIndex) {
+                  if (fileListIndex > 0) Console.Write(", ");
+                  Console.Write(index[word][fileListIndex]);
+                }
+                Console.WriteLine();
               }
               else {
                 Console.WriteLine("not found");
@@ -172,7 +180,37 @@ class Program {
             break;
           }
 
-        case "3":
+        case "3": {
+            Console.WriteLine("Enter folder path:");
+            string folderPath = Console.ReadLine();
+
+            Console.WriteLine("Enter keywords (separated by space):");
+            string keywordsInput = Console.ReadLine();
+            string[] keywords = keywordsInput.Split(' ');
+
+            string[] filePaths = Directory.GetFiles(folderPath, "*.txt");
+
+            List<TextFile> files = new List<TextFile>();
+            for (int fileIndex = 0; fileIndex < filePaths.Length; ++fileIndex) {
+              files.Add(new TextFile(filePaths[fileIndex]));
+            }
+
+            FileSearch searcher = new FileSearch();
+            List<string> result = searcher.Search(files, keywords);
+
+            Console.WriteLine("\n--- SEARCH RESULTS ---");
+            if (result.Count > 0) {
+              for (int resultIndex = 0; resultIndex < result.Count; ++resultIndex) {
+                Console.WriteLine(result[resultIndex]);
+              }
+            }
+            else {
+              Console.WriteLine("No files found.");
+            }
+            break;
+          }
+
+        case "4":
           Console.WriteLine("Exit.");
           return;
 
